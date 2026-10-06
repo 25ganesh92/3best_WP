@@ -10,6 +10,7 @@ From the command line, with the local site reachable over HTTP:
 php wp-content/plugins/3best-core/tests/suite1-portability.php
 php wp-content/plugins/3best-core/tests/suite2-functional.php
 php wp-content/plugins/3best-core/tests/suite3-security.php
+php wp-content/plugins/3best-core/tests/suite4-editing.php
 ```
 
 Each exits `0` on success and `1` if any assertion failed.
@@ -19,6 +20,7 @@ Each exits `0` on success and `1` if any assertion failed.
 | `suite1-portability.php` | Linux/cPanel portability: autoloader filename case, byte-order marks, UTF-8, path separators, hard-coded table prefixes, banned functions, ext-intl independence, plugin header, full lint |
 | `suite2-functional.php` | Pages and theme, service catalogue, location system, dynamic SEO URLs, canonical and redirect behaviour, indexability, the full landing → OTP → lead → delivery integration, delivery queue success/retry/backoff/permanent/stale, schema and indexes |
 | `suite3-security.php` | Access control, rate limiting and failure modes, client identity, OTP protection, lead-submission bypass attempts, request size, injection, secret and log hygiene, admin screens |
+| `suite4-editing.php` | The Gutenberg editing architecture introduced by the block migration: theme.json tokens and global styles, the seven block patterns, the twelve server-rendered `threebest/` blocks and their freedom from business logic, the four static pages as editable `post_content`, the single editable landing layout and its PHP fallback, header/footer configurability, and Spectra state |
 
 ## Why these cannot hurt anything
 
