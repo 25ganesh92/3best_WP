@@ -1,0 +1,22 @@
+/*
+Theme Name: 3Best
+Description: Presentation layer for the 3Best lead-generation platform, ported from the React/Next.js reference implementation. A classic PHP theme by design: 3Best is a small set of hand-built, highly specific layouts driven by generated content, not an editor-authored site, so block templates would add indirection without benefit. All business logic lives in the 3best-core plugin — this theme contains none.
+Version: 0.3.0
+Requires at least: 6.7
+Tested up to: 7.1
+Requires PHP: 8.1
+Author: 3Best
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: 3best
+Tags: custom-menu, featured-images, translation-ready, accessibility-ready
+*/
+
+/*
+ * Intentionally empty.
+ *
+ * WordPress requires this file for the theme header above, but the actual
+ * stylesheet is assets/css/main.css, enqueued with a filemtime() version in
+ * inc/enqueue.php. Keeping it separate means the ported styles are one
+ * reviewable file rather than being mixed in with theme metadata.
+ */

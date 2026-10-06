@@ -1,0 +1,123 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": true,
+		"useRootPaddingAwareAlignments": true,
+		"layout": {
+			"contentSize": "760px",
+			"wideSize": "1200px"
+		},
+		"color": {
+			"custom": false,
+			"customGradient": false,
+			"defaultPalette": false,
+			"defaultGradients": false,
+			"palette": [
+				{ "slug": "primary", "name": "Primary", "color": "#1a56db" },
+				{ "slug": "primary-hover", "name": "Primary hover", "color": "#1546b8" },
+				{ "slug": "primary-soft", "name": "Primary soft", "color": "#eff4ff" },
+				{ "slug": "accent", "name": "Accent", "color": "#0e9f6e" },
+				{ "slug": "accent-soft", "name": "Accent soft", "color": "#e6f7f0" },
+				{ "slug": "danger", "name": "Danger", "color": "#c62828" },
+				{ "slug": "ink", "name": "Ink", "color": "#0f172a" },
+				{ "slug": "body", "name": "Body text", "color": "#475569" },
+				{ "slug": "muted", "name": "Muted", "color": "#64748b" },
+				{ "slug": "surface", "name": "Surface", "color": "#ffffff" },
+				{ "slug": "surface-alt", "name": "Surface alt", "color": "#f8fafc" },
+				{ "slug": "surface-tint", "name": "Surface tint", "color": "#f1f5f9" },
+				{ "slug": "border", "name": "Border", "color": "#e2e8f0" }
+			]
+		},
+		"typography": {
+			"customFontSize": false,
+			"fluid": true,
+			"fontFamilies": [
+				{
+					"slug": "sans",
+					"name": "Inter",
+					"fontFamily": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+				}
+			],
+			"fontSizes": [
+				{ "slug": "small", "name": "Small", "size": "0.875rem" },
+				{ "slug": "medium", "name": "Medium", "size": "1rem" },
+				{ "slug": "large", "name": "Large", "size": "1.125rem" },
+				{
+					"slug": "x-large",
+					"name": "Heading 3",
+					"size": "1.3rem",
+					"fluid": { "min": "1.1rem", "max": "1.3rem" }
+				},
+				{
+					"slug": "xx-large",
+					"name": "Heading 2",
+					"size": "2.25rem",
+					"fluid": { "min": "1.55rem", "max": "2.25rem" }
+				},
+				{
+					"slug": "xxx-large",
+					"name": "Heading 1",
+					"size": "3.25rem",
+					"fluid": { "min": "2rem", "max": "3.25rem" }
+				}
+			]
+		},
+		"spacing": {
+			"customSpacingSize": false,
+			"units": [ "px", "rem", "%" ],
+			"spacingSizes": [
+				{ "slug": "20", "name": "1 Tight", "size": "12px" },
+				{ "slug": "30", "name": "2 Small", "size": "20px" },
+				{ "slug": "40", "name": "3 Medium", "size": "32px" },
+				{ "slug": "50", "name": "4 Large", "size": "48px" },
+				{ "slug": "60", "name": "5 Section", "size": "60px" },
+				{ "slug": "70", "name": "6 Section wide", "size": "84px" }
+			]
+		},
+		"border": { "radius": true, "color": true, "style": true, "width": true },
+		"shadow": {
+			"defaultPresets": false,
+			"presets": [
+				{ "slug": "xs", "name": "Extra small", "shadow": "0 1px 2px rgba(15, 23, 42, 0.06)" },
+				{ "slug": "sm", "name": "Small", "shadow": "0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04)" },
+				{ "slug": "md", "name": "Medium", "shadow": "0 8px 24px rgba(15, 23, 42, 0.08)" },
+				{ "slug": "lg", "name": "Large", "shadow": "0 20px 48px rgba(15, 23, 42, 0.12)" }
+			]
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--surface)",
+			"text": "var(--wp--preset--color--body)"
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--sans)",
+			"fontSize": "1rem",
+			"lineHeight": "1.6"
+		},
+		"elements": {
+			"heading": {
+				"color": { "text": "var(--wp--preset--color--ink)" },
+				"typography": { "fontWeight": "700", "lineHeight": "1.15" }
+			},
+			"h1": { "typography": { "fontSize": "var(--wp--preset--font-size--xxx-large)" } },
+			"h2": { "typography": { "fontSize": "var(--wp--preset--font-size--xx-large)" } },
+			"h3": { "typography": { "fontSize": "var(--wp--preset--font-size--x-large)" } },
+			"link": {
+				"color": { "text": "var(--wp--preset--color--primary)" },
+				":hover": { "color": { "text": "var(--wp--preset--color--primary-hover)" } }
+			},
+			"button": {
+				"color": {
+					"background": "var(--wp--preset--color--primary)",
+					"text": "var(--wp--preset--color--surface)"
+				},
+				"border": { "radius": "12px" },
+				"typography": { "fontWeight": "600" },
+				"spacing": { "padding": { "top": "14px", "bottom": "14px", "left": "24px", "right": "24px" } },
+				":hover": { "color": { "background": "var(--wp--preset--color--primary-hover)" } }
+			}
+		}
+	}
+}

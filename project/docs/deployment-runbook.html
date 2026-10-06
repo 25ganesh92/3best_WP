@@ -1,0 +1,479 @@
+<title>3Best Deployment Runbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style id="app-style">
+:root{
+  --paper:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --ink:#0E1623; --ink-2:#3A4757; --mid:#5B6878;
+  --line:#D9DFE7; --line-soft:#E7EBF0;
+  --accent:#2F6FEB; --accent-soft:#E8EFFD;
+  --blocker:#C4342B; --blocker-soft:#FBEAE8;
+  --gate:#A5641B; --gate-soft:#FBF0E2;
+  --done:#1C7A4C;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B111A; --surface:#131C28; --surface-2:#1A2533;
+    --ink:#E8EDF4; --ink-2:#B4C0CE; --mid:#8595A8;
+    --line:#2A3747; --line-soft:#223040;
+    --accent:#7AA6FF; --accent-soft:#17263F;
+    --blocker:#FF8A7E; --blocker-soft:#331A18;
+    --gate:#E5AE68; --gate-soft:#2E2314;
+    --done:#67D6A0;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B111A; --surface:#131C28; --surface-2:#1A2533;
+  --ink:#E8EDF4; --ink-2:#B4C0CE; --mid:#8595A8;
+  --line:#2A3747; --line-soft:#223040;
+  --accent:#7AA6FF; --accent-soft:#17263F;
+  --blocker:#FF8A7E; --blocker-soft:#331A18;
+  --gate:#E5AE68; --gate-soft:#2E2314;
+  --done:#67D6A0;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+h1,h2{font-family:Archivo,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.shell{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+
+.bar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand b{font-family:Archivo;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.brand span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);font-weight:500}
+.stat{display:flex;align-items:center;gap:8px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--mid)}
+.stat b{font-family:Archivo;font-weight:700;font-size:15px;color:var(--ink)}
+.stat b.red{color:var(--blocker)}
+.stat b.green{color:var(--done)}
+.track{width:120px;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s ease}
+.save{font-size:12px;color:var(--mid);min-width:88px;text-align:right}
+.save.ok{color:var(--done)}
+
+.mast{padding:40px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+.mast h1{font-size:clamp(30px,4.4vw,46px);font-weight:700;letter-spacing:-.022em;line-height:1.05;max-width:17ch}
+.mast p{margin:16px 0 0;max-width:66ch;color:var(--ink-2);font-size:16px}
+.meta{display:flex;gap:28px;flex-wrap:wrap;margin-top:24px}
+.meta div{display:flex;flex-direction:column;gap:1px}
+.meta dt{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--mid)}
+.meta dd{margin:0;color:var(--ink);font-family:"IBM Plex Mono";font-size:13px}
+.notice{margin:26px 0 0;padding:14px 16px;border-radius:3px;background:var(--accent-soft);border-left:3px solid var(--accent);font-size:13.5px;color:var(--ink-2);max-width:78ch}
+.notice b{color:var(--ink)}
+
+.blockers{margin:40px 0 0}
+.blockers h2{font-size:13px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--blocker);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.blockers h2 em{font-style:normal;font-family:"IBM Plex Mono";font-size:12px;color:var(--mid);letter-spacing:0;text-transform:none;font-weight:400}
+.blist{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));border-top:1px solid var(--line-soft);border-left:1px solid var(--line-soft);border-radius:3px;overflow:hidden}
+.blist li{background:var(--surface);padding:11px 14px;display:flex;align-items:flex-start;gap:10px;font-size:13.5px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.blist .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--blocker);margin-top:7px}
+.blist li.done{color:var(--mid)}
+.blist li.done .dot{background:var(--done)}
+.blist li.done .t{text-decoration:line-through;text-decoration-color:var(--line)}
+.blist a{color:inherit;text-decoration:none}
+.blist a:hover .t{text-decoration:underline}
+.blist .s{display:block;font-size:11px;color:var(--mid);font-family:"IBM Plex Mono";margin-top:2px}
+
+.grid{display:grid;grid-template-columns:234px 1fr;gap:48px;margin-top:48px;align-items:start}
+.rail{position:sticky;top:78px}
+.rail ol{list-style:none;margin:0;padding:0}
+.rail a{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:baseline;padding:7px 8px;border-radius:3px;text-decoration:none;color:var(--ink-2);font-size:13px}
+.rail a:hover{background:var(--surface-2);color:var(--ink)}
+.rail .n{font-family:Archivo;font-weight:600;font-size:11px;color:var(--mid);font-variant-numeric:tabular-nums}
+.rail .c{font-family:"IBM Plex Mono";font-size:11px;color:var(--mid);font-variant-numeric:tabular-nums}
+.rail a.complete .n,.rail a.complete .c{color:var(--done)}
+
+.stage{scroll-margin-top:86px;margin-bottom:52px}
+.stage-head{display:flex;align-items:baseline;gap:14px;padding-bottom:10px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.stage-head .n{font-family:Archivo;font-weight:700;font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.stage-head h2{font-size:21px;font-weight:600;letter-spacing:-.012em;margin-right:auto}
+.stage-head .c{font-family:"IBM Plex Mono";font-size:12px;color:var(--mid);font-variant-numeric:tabular-nums}
+.stage-note{font-size:13.5px;color:var(--mid);margin:12px 0 0;max-width:72ch}
+
+.rows{list-style:none;margin:10px 0 0;padding:0}
+.row{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:13px 14px 13px 11px;border-bottom:1px solid var(--line-soft);border-left:2px solid transparent;align-items:start}
+.row.blocker{border-left-color:var(--blocker);background:var(--blocker-soft)}
+.row:hover{background:var(--surface-2)}
+.row.blocker:hover{background:var(--blocker-soft)}
+.row input{appearance:none;-webkit-appearance:none;width:17px;height:17px;margin:3px 0 0;border:1.5px solid var(--mid);border-radius:3px;background:var(--surface);cursor:pointer;position:relative;transition:background .15s,border-color .15s}
+.row input:hover{border-color:var(--accent)}
+.row input:checked{background:var(--done);border-color:var(--done)}
+.row input:checked::after{content:"";position:absolute;left:5px;top:1px;width:4px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.row input:disabled{cursor:not-allowed;opacity:.5}
+.row label{cursor:pointer;display:block}
+.row.off label{cursor:default}
+.row .t{font-size:14.5px;color:var(--ink);display:block}
+.row.checked .t{color:var(--mid);text-decoration:line-through;text-decoration-color:var(--line)}
+.row .d{display:block;margin-top:4px;font-size:12.5px;color:var(--mid);max-width:76ch;overflow-wrap:anywhere}
+.row .d code{background:var(--surface-2);padding:1px 5px;border-radius:3px;font-size:11.5px;color:var(--ink-2)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.tag{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:2px;font-weight:500;white-space:nowrap}
+.tag.deploy{background:var(--accent-soft);color:var(--accent)}
+.tag.launch{background:var(--gate-soft);color:var(--gate)}
+.tag.opt{background:var(--surface-2);color:var(--mid)}
+.tag.block{background:var(--blocker);color:#fff}
+
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mid);max-width:78ch}
+footer p{margin:0 0 10px}
+footer .tag{vertical-align:middle}
+
+@media (max-width:980px){
+  .grid{grid-template-columns:1fr;gap:28px}
+  .rail{position:static;border:1px solid var(--line-soft);border-radius:3px;padding:8px;background:var(--surface)}
+  .rail ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}
+}
+@media (max-width:560px){
+  .shell{padding:0 16px 72px}
+  .bar-in{padding:12px 16px}
+  .track{width:70px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+
+<div id="root"></div>
+
+<script type="application/json" id="state">{"checked":{"p6":true}}</script>
+
+<script id="app-script">
+(function(){
+"use strict";
+
+var D="deploy", L="launch", O="opt";
+
+var STAGES=[
+{id:"pre",t:"Pre-deployment",note:"Decisions and content that must be settled on the local build before anything is uploaded.",items:[
+ {id:"p1",tag:D,t:"Finalise the Spectra decision locally",d:"<code>ultimate-addons-for-gutenberg</code> is active but unused \u2014 no page uses a <code>uagb</code> block. Deactivate it locally, re-check all seven pages, then exclude it from the upload."},
+ {id:"p2",tag:D,t:"Write the final Privacy Policy content",d:"The page exists with roughly 543 characters of placeholder. The site collects name, email, phone, address and SMS consent."},
+ {id:"p3",tag:D,t:"Write the final Terms of Service content",d:"Roughly 563 characters of placeholder today."},
+ {id:"p4",tag:D,t:"Confirm the production domain and whether it is a root install",d:"Local runs under <code>/3best/</code>. A root install changes <code>RewriteBase</code> and every absolute URL."},
+ {id:"p5",tag:D,t:"Confirm the business timezone",d:"Local is <code>America/New_York</code>. Lead and consent timestamps are stored in UTC and displayed in site time."},
+ {id:"p6",tag:D,t:"Production data migration decision",d:"DECIDED. Production starts with <code>wp_threebest_leads</code> = 0 rows, <code>wp_threebest_otp_verifications</code> = 0 rows and <code>wp_threebest_throttle</code> = 0 rows. The 14 approved service/location configuration rows are preserved. No development lead data, OTP verification records or throttle counters are imported. Local development records are retained for now and are not to be deleted."},
+ {id:"p7",tag:D,t:"Obtain Google Maps, Twilio and Zapier credentials from their consoles",d:"Needed at stages 09\u201311. Do not paste them into any document or ticket."},
+ {id:"p8",tag:D,t:"Re-run the local test suites after the Spectra change",d:"Phase 10 ran 279 assertions green. Any local change invalidates that until it is re-run."}
+]},
+{id:"backup",t:"Backup",note:"On a first deployment there is little to lose. The discipline is established now so the first redeploy is safe.",items:[
+ {id:"b1",tag:D,t:"Production backup exists, and has been opened to verify it",d:"An archive nobody has opened is not a backup."},
+ {id:"b2",tag:D,t:"Database dump taken",d:"<code>mysqldump --single-transaction --default-character-set=utf8mb4 --add-drop-table</code>, or cPanel \u2192 Backup."},
+ {id:"b3",tag:D,t:"Full document-root file archive taken"},
+ {id:"b4",tag:D,t:"wp-config.php copied separately, outside the web root",d:"It holds the only copy of the production salts."},
+ {id:"b5",tag:D,t:"Uploads directory included in the archive",d:"Currently irrelevant \u2014 zero media \u2014 but it will not stay that way."},
+ {id:"b6",tag:D,t:"Rollback procedure confirmed",d:"Walk stage 15 end to end on a staging copy, or at minimum confirm every step is executable on this host."},
+ {id:"b7",tag:D,t:"Backups stored off-server"}
+]},
+{id:"cpanel",t:"cPanel environment",note:"The host must satisfy what the plugin actually enforces at boot.",items:[
+ {id:"c1",tag:D,t:"PHP 8.2 selected for the domain",d:"Minimum 8.1, enforced by <code>Requirements::MIN_PHP</code>. 8.2.12 is what the test suite ran against."},
+ {id:"c2",tag:D,t:"Extensions confirmed loaded: curl, mbstring, json, openssl",d:"The plugin refuses to boot without all four. <code>intl</code> is deliberately not required."},
+ {id:"c3",tag:D,t:"MySQL 5.7+ or MariaDB 10.3+, with InnoDB",d:"The atomic rate limiter needs row-level locking and <code>INSERT \u2026 ON DUPLICATE KEY UPDATE</code>."},
+ {id:"c4",tag:D,t:"Database and user created, ALL PRIVILEGES granted"},
+ {id:"c5",tag:D,t:"Database character set is utf8mb4",d:"Local collation is <code>utf8mb4_unicode_520_ci</code>; <code>utf8mb4_unicode_ci</code> is an acceptable substitute."},
+ {id:"c6",tag:D,t:"memory_limit at least 256M"},
+ {id:"c7",tag:D,t:"max_execution_time at least 30 seconds",d:"A delivery batch of 10, with a 15-second per-request timeout."},
+ {id:"c8",tag:D,t:"mod_rewrite confirmed available",d:"Without it every landing page, 301 and legacy ZIP redirect returns 404."}
+]},
+{id:"files",t:"File deployment",note:"Only two directories belong to this project. Everything else is WordPress core or local noise.",items:[
+ {id:"f1",tag:D,t:"WordPress core installed fresh on the host",d:"Core is stock 7.1.2 with no modifications \u2014 let cPanel install it rather than uploading this machine's copy."},
+ {id:"f2",tag:D,t:"Upload wp-content/plugins/3best-core/",d:"712 KB. All business logic."},
+ {id:"f3",tag:D,t:"Upload wp-content/themes/3best/",d:"1.5 MB, including 22 <code>.webp</code> images and 4 <code>.woff2</code> fonts. All imagery ships with the theme."},
+ {id:"f4",tag:D,t:"Do not upload the local wp-config.php",d:"It carries local credentials, local salts, <code>THREEBEST_ALLOW_DEV_OTP</code> and <code>WP_ENVIRONMENT_TYPE = 'development'</code>."},
+ {id:"f5",tag:D,t:"Do not upload wp-content/debug.log"},
+ {id:"f6",tag:D,t:"Do not upload wp-content/uploads/",d:"16 MB containing zero media \u2014 only Spectra and Astra generated cache. The media library has 0 attachments."},
+ {id:"f7",tag:D,t:"Do not upload Spectra, Akismet or hello.php"},
+ {id:"f8",tag:O,t:"Keep one recent default theme as a fallback",d:"For example <code>twentytwentyfive</code>, in case the custom theme ever fatals."},
+ {id:"f9",tag:D,t:"Set permissions: directories 755, files 644",d:"Owned by the cPanel account user, not root."},
+ {id:"f10",tag:D,t:"Set wp-config.php to 600"}
+]},
+{id:"db",t:"Database migration",note:"2.02 MB locally, table prefix wp_.",items:[
+ {id:"d1",tag:D,t:"Clear transients and rewrite_rules before exporting",d:"71 transients including roughly 780 KB of feed caches. <code>rewrite_rules</code> is rebuilt on import anyway."},
+ {id:"d2",tag:D,t:"Truncate wp_threebest_throttle before exporting",d:"Rate-limit counters are transient by nature."},
+ {id:"d3",tag:D,t:"Export with utf8mb4 and --add-drop-table"},
+ {id:"d4",tag:D,t:"Import into the production database"},
+ {id:"d5",tag:D,t:"Production starts with leads, otp_verifications and throttle all at 0 rows",d:"Executes the stage 01 decision. <code>wp_threebest_leads</code>, <code>wp_threebest_otp_verifications</code> and <code>wp_threebest_throttle</code> must all be empty; <code>wp_threebest_service_locations</code> keeps its 14 rows."},
+ {id:"d6",tag:D,t:"Confirm the 14 approved combinations survived",d:"<code>SELECT COUNT(*), SUM(is_indexable) FROM wp_threebest_service_locations</code> must return 14 and 14. This is real configuration, not test data."},
+ {id:"d7",tag:D,t:"Run a serialisation-aware URL replacement",d:"<code>wp search-replace 'http://localhost/3best' 'https://&lt;domain&gt;' --all-tables --precise</code>. A plain SQL replace corrupts serialised options."},
+ {id:"d8",tag:D,t:"Confirm all four wp_threebest_ tables exist"},
+ {id:"d9",tag:D,t:"Confirm threebest_schema_version reads 1.2.0"},
+ {id:"d10",tag:D,t:"Confirm no row anywhere still contains 'localhost'"},
+ {id:"d11",tag:D,t:"Confirm siteurl and home are the production HTTPS URL, with no trailing slash"}
+]},
+{id:"config",t:"wp-config.php production configuration",note:"The five credential constants exist locally only as a commented-out template with empty placeholders. Production needs them defined for real.",items:[
+ {id:"w1",tag:D,t:"Production wp-config.php prepared",d:"Written fresh on the host, never copied from development."},
+ {id:"w2",tag:D,t:"Database credentials and $table_prefix = 'wp_' set",d:"The prefix must match the imported dump."},
+ {id:"w3",tag:D,t:"Eight salts generated fresh for production",d:"Not copied. <code>Otp_Service</code> keys code and token hashes with <code>wp_salt('secure_auth')</code>, and <code>Throttle</code> keys rate-limit counters with <code>wp_salt('nonce')</code>."},
+ {id:"w4",tag:D,t:"WP_ENVIRONMENT_TYPE set to 'production'",d:"This alone disables the development OTP provider, even if the opt-in constant were copied by mistake. It is defence in depth, not a reason to ship the line."},
+ {id:"w5",tag:D,t:"THREEBEST_ALLOW_DEV_OTP does not exist in production",d:"Verify literally: <code>grep -c THREEBEST_ALLOW_DEV_OTP wp-config.php</code> must output <code>0</code>. A verifier that accepts a code nobody received is a way to submit leads with an unowned phone number."},
+ {id:"w6",tag:D,t:"WP_DEBUG, WP_DEBUG_LOG and WP_DEBUG_DISPLAY all false",d:"Or point the log at a path outside the web root."},
+ {id:"w7",tag:D,t:"DISALLOW_FILE_EDIT set to true"},
+ {id:"w8",tag:D,t:"DISABLE_WP_CRON set to true",d:"Pair it with the real cron job in stage 11."},
+ {id:"w9",tag:O,t:"THREEBEST_TRUSTED_PROXIES defined, only if behind a proxy",d:"Without it every visitor shares one rate-limit counter. Set wrongly, a client can choose its own identity. Needs the real topology first."}
+]},
+{id:"wp",t:"WordPress configuration",note:"Applied in the admin after the import.",items:[
+ {id:"n1",tag:D,t:"Activate the 3Best theme and the 3Best Core plugin"},
+ {id:"n2",tag:D,t:"Visit /wp-admin/ once to run the schema migration",d:"<code>Schema::maybe_upgrade()</code> runs on <code>admin_init</code> and nowhere else. This step is load-bearing."},
+ {id:"n3",tag:D,t:"Overview reports schema 1.2.0, four tables present, migration up to date"},
+ {id:"n4",tag:D,t:"Front page set to the static Home page",d:"<code>show_on_front = page</code>. No posts page \u2014 the site has no blog."},
+ {id:"n5",tag:D,t:"Site title and timezone set"},
+ {id:"n6",tag:D,t:"New production administrator created",d:"Do not reuse the local dev-admin account or password."},
+ {id:"n7",tag:L,t:"blog_public set to 1 \u2014 at final launch only",d:"Currently 0. Until it is 1, every page including all 14 approved combinations emits <code>noindex, nofollow</code>. Leave it at 0 throughout testing so a half-configured site is never indexed, then flip it as one of the last acts of launch."},
+ {id:"n8",tag:L,t:"otp_provider switched from 'dev' to 'twilio_verify'",d:"On the 3Best \u2192 Settings screen, once credentials are in place."},
+ {id:"n9",tag:L,t:"location_provider switched to 'google_places'",d:"Public Nominatim is development-only by confirmed decision."},
+ {id:"n10",tag:D,t:"Settings shows no \u2018sends no SMS\u2019 warning once switched"}
+]},
+{id:"https",t:"HTTPS, rewrite and permalinks",note:"The URL surface is the product, and none of it works without mod_rewrite.",items:[
+ {id:"h1",tag:D,t:"HTTPS active with a valid certificate",d:"cPanel AutoSSL or Let's Encrypt. The lead form posts name, email, phone and street address."},
+ {id:"h2",tag:D,t:"HTTPS forced for all traffic"},
+ {id:"h3",tag:D,t:"Do not copy the local .htaccess",d:"It contains <code>RewriteBase /3best/</code> and <code>RewriteRule . /3best/index.php</code>, which are wrong for a root install."},
+ {id:"h4",tag:D,t:"Permalinks set to /%postname%/ and saved once",d:"Saving rebuilds both <code>rewrite_rules</code> and <code>.htaccess</code>."},
+ {id:"h5",tag:D,t:"Confirm exactly one rewrite rule matching \u2018-in-\u2019 exists"},
+ {id:"h6",tag:D,t:"Confirm no mixed-content warnings on any page"}
+]},
+{id:"twilio",t:"Twilio configuration",note:"Phone verification. Until this is live and tested, nobody has proved ownership of a number.",items:[
+ {id:"t1",tag:L,t:"THREEBEST_TWILIO_ACCOUNT_SID defined"},
+ {id:"t2",tag:L,t:"THREEBEST_TWILIO_AUTH_TOKEN defined"},
+ {id:"t3",tag:L,t:"THREEBEST_TWILIO_VERIFY_SERVICE_SID defined"},
+ {id:"t4",tag:L,t:"Settings reports all three as configured",d:"It reports state only, never a value."},
+ {id:"t5",tag:L,t:"Real SMS verification tested with a real phone",d:"Request a code to a number you control: the SMS must arrive, the response must report <code>smsSent: true</code>, a wrong code must be rejected, and the correct one must verify."},
+ {id:"t6",tag:L,t:"Resend cooldown confirmed live",d:"A second request within 30 seconds is refused."},
+ {id:"t7",tag:L,t:"Daily cap confirmed live",d:"The sixth send to one number in a day is refused, with the same non-enumerating message as the cooldown."},
+ {id:"t8",tag:O,t:"Twilio auth token scoped to the Verify service"}
+]},
+{id:"google",t:"Google Maps configuration",note:"Location autocomplete. Nominatim is development-only by confirmed decision.",items:[
+ {id:"g1",tag:L,t:"THREEBEST_GOOGLE_MAPS_API_KEY defined",d:"With the Places API enabled in the Google Cloud Console."},
+ {id:"g2",tag:L,t:"Settings reports the key as configured"},
+ {id:"g3",tag:L,t:"Autocomplete returns real suggestions on production",d:"Type a city into the homepage search and confirm both results and attribution."},
+ {id:"g4",tag:O,t:"Key restricted by HTTP referrer, and to the Places API only"}
+]},
+{id:"zapier",t:"Zapier configuration",note:"Lead delivery. Leads are always stored first \u2014 this controls only whether they are sent on.",items:[
+ {id:"z1",tag:L,t:"THREEBEST_ZAPIER_WEBHOOK_URL defined",d:"Must be HTTPS \u2014 the provider refuses <code>http</code> with <code>webhook_url_not_https</code>."},
+ {id:"z2",tag:L,t:"Settings reports the webhook as configured"},
+ {id:"z3",tag:L,t:"Cron job added, every five minutes",d:"<code>*/5 * * * * /usr/local/bin/php /home/&lt;user&gt;/public_html/wp-cron.php</code> \u2014 matching the 300-second <code>threebest_five_minutes</code> interval."},
+ {id:"z4",tag:L,t:"Overview reports \u2018Scheduled events: 1 (correct)\u2019"},
+ {id:"z5",tag:L,t:"delivery_enabled switched on"},
+ {id:"z6",tag:L,t:"Zapier delivery tested end to end",d:"Submit a real verified lead, run the queue, and confirm the lead becomes <code>delivered</code> with a completion timestamp while the Zap shows the payload."},
+ {id:"z7",tag:L,t:"Retry behaviour tested",d:"Point the webhook at a URL returning 503: the lead stays queued, the attempt is counted, <code>http_503</code> is recorded, and it is not retried immediately. Then restore the real URL and requeue."},
+ {id:"z8",tag:L,t:"Cron-driven delivery confirmed with no manual trigger"},
+ {id:"z9",tag:O,t:"Zap made idempotent on lead_uid",d:"Delivery is at-least-once, not exactly-once."}
+]},
+{id:"testing",t:"Post-deployment testing",note:"Runs before credentials are configured, so a routing or permissions problem is never debugged with live SMS.",items:[
+ {id:"q1",tag:D,t:"Homepage, /services/ and all five content pages return 200"},
+ {id:"q2",tag:D,t:"/wp-admin/ loads with the 3Best menu: Overview, Leads, SEO Pages, Settings"},
+ {id:"q3",tag:D,t:"All 14 approved URLs return 200"},
+ {id:"q4",tag:D,t:"Canonical is absolute HTTPS, exactly one per page, with no query string"},
+ {id:"q5",tag:D,t:"Alias 301 works: /plumber-in-newark-new-jersey/ to /plumber-in-newark-nj/"},
+ {id:"q6",tag:D,t:"Legacy ZIP 301s work: /plumber-in-07102/ and /plumber-in-07030/"},
+ {id:"q7",tag:D,t:"Invalid URLs 404 with the theme's own 404 template",d:"<code>/wizard-in-newark-nj/</code>, <code>/plumber-in-99999/</code>, <code>/no-such-page/</code>."},
+ {id:"q8",tag:D,t:"Metadata: one each of title, description, robots, og:title, og:url, twitter:card"},
+ {id:"q9",tag:D,t:"Three valid JSON-LD blocks, with no ratings, reviews or prices"},
+ {id:"q10",tag:D,t:"Lead form renders once, with the correct service and location context"},
+ {id:"q11",tag:D,t:"Consent is unchecked by default and enforced on submit"},
+ {id:"q12",tag:D,t:"Anonymous GET /wp-json/threebest/v1/status returns 401"},
+ {id:"q13",tag:D,t:"Settings \u2192 Rate limits reports \u2018dedicated table, atomic increment\u2019",d:"If it says \u2018transients\u2019, the schema upgrade has not run."},
+ {id:"q14",tag:D,t:"No horizontal overflow at 390px, 768px and 1280px"},
+ {id:"q15",tag:D,t:"Browser console clean on every page type"},
+ {id:"q16",tag:D,t:"PHP error log clean \u2014 no fatal, warning, notice or deprecation"}
+]},
+{id:"smoke",t:"Production smoke test",note:"Requires live credentials. These are the checks that could not be performed anywhere but production.",items:[
+ {id:"s1",tag:L,t:"With blog_public at 1, all 14 approved pages are index, follow"},
+ {id:"s2",tag:L,t:"An unapproved combination is noindex, follow",d:"For example <code>/plumber-in-denver-co/</code> \u2014 it renders, but is not offered to search engines."},
+ {id:"s3",tag:L,t:"Lead persists with correct service, location, consent version and wording"},
+ {id:"s4",tag:L,t:"Lead appears in 3Best \u2192 Leads, with no contact details in the list view"},
+ {id:"s5",tag:L,t:"Queue state correct immediately after submission: pending, zero attempts"},
+ {id:"s6",tag:L,t:"Full end-to-end from a phone",d:"Submit from the live form on a mobile device, verify by SMS, and confirm the lead reaches Zapier and onward."},
+ {id:"s7",tag:L,t:"View source carries no credential and no webhook URL"},
+ {id:"s8",tag:L,t:"Error responses leak no path, class name or stack text"}
+]},
+{id:"launch",t:"Final launch",note:"The last acts, in order.",items:[
+ {id:"l1",tag:L,t:"Every blocker above is ticked"},
+ {id:"l2",tag:L,t:"blog_public flipped to 1"},
+ {id:"l3",tag:L,t:"Final check: grep for THREEBEST_ALLOW_DEV_OTP returns 0"},
+ {id:"l4",tag:L,t:"Error log clean immediately before launch"},
+ {id:"l5",tag:L,t:"DNS pointed, or holding page removed"},
+ {id:"l6",tag:L,t:"One real end-to-end lead submitted after go-live"},
+ {id:"l7",tag:L,t:"Queue and error log monitored for 24 hours"},
+ {id:"l8",tag:O,t:"Uptime monitoring pointed at /wp-json/threebest/v1/status"},
+ {id:"l9",tag:O,t:"XML sitemap for the 14 approved combinations"},
+ {id:"l10",tag:O,t:"Lead export, and a GDPR/CCPA erasure path"},
+ {id:"l11",tag:O,t:"A read-only admin role below manage_options"},
+ {id:"l12",tag:O,t:"Remove the two inert consent_version and consent_text keys from threebest_settings"},
+ {id:"l13",tag:O,t:"Replace placeholder imagery"}
+]},
+{id:"rollback",t:"Rollback",note:"Read this before you need it. Rollback does not undo delivered leads \u2014 anything already sent to Zapier has left the system.",items:[
+ {id:"r1",tag:O,t:"Stop traffic, or enable maintenance mode"},
+ {id:"r2",tag:O,t:"If rolling back after a delivery incident, disable delivery first",d:"Restoring the database resets <code>delivery_status</code>, which can cause re-delivery. Reconcile by <code>lead_uid</code> in Zapier."},
+ {id:"r3",tag:O,t:"Restore 3best-core and the 3best theme from the archive"},
+ {id:"r4",tag:O,t:"Restore the database from the dump",d:"Taken with <code>--add-drop-table</code>, so it replaces cleanly."},
+ {id:"r5",tag:O,t:"Restore wp-config.php from the separate copy"},
+ {id:"r6",tag:O,t:"Flush rewrites: Settings \u2192 Permalinks \u2192 Save"},
+ {id:"r7",tag:O,t:"Confirm exactly one scheduled threebest_process_delivery_queue event"},
+ {id:"r8",tag:O,t:"Re-run the stage 12 tests that need no credentials"}
+]}
+];
+
+var BLOCKERS={
+ p1:"Spectra decision finalised locally", p2:"Privacy Policy final content",
+ p3:"Terms final content", b1:"Production backup exists",
+ b6:"Rollback procedure confirmed", w1:"Production wp-config.php prepared",
+ w5:"THREEBEST_ALLOW_DEV_OTP absent", n7:"blog_public = 1 at final launch",
+ n8:"otp_provider set to Twilio", h1:"HTTPS active",
+ t5:"Real Twilio SMS tested", g1:"Google Maps credentials configured",
+ z1:"Zapier webhook configured", z6:"Zapier delivery tested"
+};
+var TAGNAME={deploy:"Before deploy",launch:"Before launch",opt:"Optional"};
+
+var state, api=null, writable=true, timer=null, dirty=false;
+try{ state=JSON.parse(document.getElementById("state").textContent)||{}; }catch(e){ state={}; }
+if(!state.checked||typeof state.checked!=="object") state.checked={};
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function pad(n){return n<10?"0"+n:""+n;}
+function items(){var o=[],i,j;for(i=0;i<STAGES.length;i++)for(j=0;j<STAGES[i].items.length;j++)o.push(STAGES[i].items[j]);return o;}
+function stageOf(id){var i,j;for(i=0;i<STAGES.length;i++)for(j=0;j<STAGES[i].items.length;j++)if(STAGES[i].items[j].id===id)return pad(i+1)+" \u00b7 "+STAGES[i].t;return "";}
+
+function render(){
+  var all=items(), done=0, i, k;
+  for(i=0;i<all.length;i++) if(state.checked[all[i].id]) done++;
+  var bids=Object.keys(BLOCKERS), bopen=0;
+  for(i=0;i<bids.length;i++) if(!state.checked[bids[i]]) bopen++;
+
+  var h='';
+  h+='<div class="bar"><div class="bar-in">'+
+     '<div class="brand"><b>3Best Deployment</b><span>Runbook</span></div>'+
+     '<div class="stat"><span class="track"><i style="width:'+(all.length?(done/all.length*100):0)+'%"></i></span>'+
+     '<b>'+done+'</b><span>of '+all.length+' done</span></div>'+
+     '<div class="stat"><b class="'+(bopen?'red':'green')+'">'+bopen+'</b><span>blockers open</span></div>'+
+     '<div class="save" id="save"></div></div></div>';
+
+  h+='<div class="shell"><header class="mast">'+
+     '<div class="eyebrow">Phase 11 \u00b7 Pre-deployment</div>'+
+     '<h1>WordPress migration to cPanel</h1>'+
+     '<p>The ordered checklist for taking 3Best from the local XAMPP build to production. Work top to bottom \u2014 these stages are sequenced, not merely numbered. Ticks are shared with everyone who opens this page.</p>'+
+     '<div class="meta">'+
+     '<div><dt>Plugin</dt><dd>3best-core 0.9.0</dd></div>'+
+     '<div><dt>Schema</dt><dd>1.2.0</dd></div>'+
+     '<div><dt>Requires</dt><dd>PHP 8.1+ \u00b7 WP 6.7+</dd></div>'+
+     '<div><dt>Target</dt><dd>Linux \u00b7 Apache \u00b7 cPanel</dd></div>'+
+     '<div><dt>Local tests</dt><dd>279 / 279 passing</dd></div>'+
+     '</div>'+
+     '<p class="notice"><b>Nothing here is pre-ticked.</b> Every item starts unchecked because none of it has been performed or verified yet. Tick an item only once you have actually done it and seen the expected result \u2014 not when you believe it to be true.</p>'+
+     '</header>';
+
+  h+='<section class="blockers"><h2>Launch blockers <em>'+bopen+' of '+bids.length+' outstanding</em></h2><ul class="blist">';
+  for(i=0;i<bids.length;i++){
+    var id=bids[i], ok=!!state.checked[id];
+    h+='<li class="'+(ok?'done':'')+'"><span class="dot"></span><a href="#item-'+id+'">'+
+       '<span class="t">'+esc(BLOCKERS[id])+'</span><span class="s">'+esc(stageOf(id))+'</span></a></li>';
+  }
+  h+='</ul></section>';
+
+  h+='<div class="grid"><nav class="rail" aria-label="Stages"><ol>';
+  for(i=0;i<STAGES.length;i++){
+    var st=STAGES[i], sd=0;
+    for(k=0;k<st.items.length;k++) if(state.checked[st.items[k].id]) sd++;
+    h+='<li><a class="'+(sd===st.items.length?'complete':'')+'" href="#stage-'+st.id+'">'+
+       '<span class="n">'+pad(i+1)+'</span><span>'+esc(st.t)+'</span>'+
+       '<span class="c">'+sd+'/'+st.items.length+'</span></a></li>';
+  }
+  h+='</ol></nav><main>';
+
+  for(i=0;i<STAGES.length;i++){
+    var s=STAGES[i], d2=0;
+    for(k=0;k<s.items.length;k++) if(state.checked[s.items[k].id]) d2++;
+    h+='<section class="stage" id="stage-'+s.id+'">'+
+       '<div class="stage-head"><span class="n">'+pad(i+1)+'</span><h2>'+esc(s.t)+'</h2>'+
+       '<span class="c">'+d2+' / '+s.items.length+'</span></div>';
+    if(s.note) h+='<p class="stage-note">'+esc(s.note)+'</p>';
+    h+='<ul class="rows">';
+    for(k=0;k<s.items.length;k++){
+      var it=s.items[k], on=!!state.checked[it.id], blk=Object.prototype.hasOwnProperty.call(BLOCKERS,it.id);
+      h+='<li class="row'+(blk?' blocker':'')+(on?' checked':'')+(writable?'':' off')+'" id="item-'+it.id+'">'+
+         '<input type="checkbox" id="cb-'+it.id+'" data-id="'+it.id+'"'+(on?' checked':'')+(writable?'':' disabled')+'>'+
+         '<label for="cb-'+it.id+'"><span class="t">'+esc(it.t)+'</span>'+
+         (it.d?'<span class="d">'+it.d+'</span>':'')+
+         '<span class="tags"><span class="tag '+it.tag+'">'+TAGNAME[it.tag]+'</span>'+
+         (blk?'<span class="tag block">Blocker</span>':'')+'</span></label></li>';
+    }
+    h+='</ul></section>';
+  }
+
+  h+='</main></div><footer>'+
+     '<p><b>Legend.</b> <span class="tag deploy">Before deploy</span> must be done before anything is uploaded. '+
+     '<span class="tag launch">Before launch</span> must be done before the site goes live. '+
+     '<span class="tag opt">Optional</span> can follow launch. '+
+     '<span class="tag block">Blocker</span> marks one of the fourteen named launch blockers.</p>'+
+     '<p>Built from the Phase 0\u201310 implementation as it actually stands. Constant names, table names, file paths and limits are taken from the code rather than assumed. No credential value appears anywhere in this document.</p>'+
+     '</footer></div>';
+
+  document.getElementById("root").innerHTML=h;
+  if(saveMsg) setSave(saveMsg.text, saveMsg.ok);
+}
+
+var saveMsg=null;
+function setSave(text, ok){
+  saveMsg = text ? {text:text, ok:!!ok} : null;
+  var el=document.getElementById("save");
+  if(el){ el.textContent=text||""; el.className="save"+(ok?" ok":""); }
+}
+
+document.addEventListener("change", function(ev){
+  var cb=ev.target;
+  if(!cb||cb.type!=="checkbox"||!cb.getAttribute("data-id")) return;
+  var id=cb.getAttribute("data-id");
+  if(cb.checked) state.checked[id]=true; else delete state.checked[id];
+  if(writable&&api){ dirty=true; setSave("Saving\u2026",false); }
+  else { setSave("Local only",false); }
+  render();
+  if(writable&&api){ clearTimeout(timer); timer=setTimeout(save,1200); }
+});
+
+function buildDocument(){
+  var style=document.getElementById("app-style").textContent;
+  var script=document.getElementById("app-script").textContent;
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'+
+   '<meta name="viewport" content="width=device-width, initial-scale=1">\n'+
+   '<title>3Best Deployment Runbook<\/title>\n'+
+   '<link rel="preconnect" href="https://fonts.googleapis.com">\n'+
+   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'+
+   '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">\n'+
+   '<style id="app-style">'+style+'<\/style>\n<\/head>\n<body>\n'+
+   '<div id="root"><\/div>\n'+
+   '<script type="application/json" id="state">'+JSON.stringify({checked:state.checked})+'<\/script>\n'+
+   '<script id="app-script">'+script+'<\/script>\n<\/body>\n<\/html>';
+}
+
+function save(){
+  if(!api||!dirty) return;
+  api.publish(buildDocument()).then(function(){
+    dirty=false; setSave("Saved",true);
+    setTimeout(function(){ if(!dirty) setSave(""); },2400);
+  },function(err){
+    var code=err&&err.code;
+    if(code==="conflict"){ setSave(""); return; }
+    if(code==="not_writer"||code==="not_granted"||code==="not_declared"||code==="consent_required"){
+      writable=false; setSave("Read-only",false); render(); return;
+    }
+    setSave("Not saved",false);
+  });
+}
+
+render();
+
+if(window.claude&&typeof window.claude.use==="function"){
+  window.claude.use("artifact").then(function(a){
+    api=a;
+    if(!a) setSave("Local only",false);
+  },function(){ setSave("Local only",false); });
+}else{
+  setSave("Local only",false);
+}
+})();
+</script>

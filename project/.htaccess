@@ -1,0 +1,10 @@
+# Development documentation and one-off tooling. Never web-reachable.
+#
+# Mirrors wp-content/plugins/3best-core/tests/.htaccess. This matters more here
+# than it does there: migrate-pages.php loads WordPress, assumes the first user
+# and rewrites four pages, and unlike the test suites it carries no CLI guard of
+# its own. This file is the only thing standing between it and a URL.
+Deny from all
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

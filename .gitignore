@@ -1,0 +1,124 @@
+# =============================================================================
+# 3Best — repository scope
+#
+# Only three directories in this WordPress install belong to the project:
+#
+#   wp-content/themes/3best         presentation layer
+#   wp-content/plugins/3best-core   all business logic
+#   project/                        deployment docs and one-off tooling
+#
+# WordPress core is stock 7.1.2 with no modifications and is installed fresh on
+# the production host (runbook f1), so it is deliberately not tracked.
+#
+# The approach is deny-by-default, then re-include. A core upgrade, a newly
+# installed plugin, a database dump dropped in the web root or a stray debug log
+# therefore cannot be staged by accident — it has to be allowlisted first.
+# =============================================================================
+
+# Ignore everything at the root ...
+/*
+
+# ... then re-include only what the project owns.
+!.gitignore
+!/project/
+!/wp-content/
+
+wp-content/*
+!wp-content/themes/
+!wp-content/plugins/
+
+wp-content/themes/*
+!wp-content/themes/3best/
+
+wp-content/plugins/*
+!wp-content/plugins/3best-core/
+
+
+# =============================================================================
+# Hard exclusions.
+#
+# Redundant against the allowlist above, and deliberately so: the last matching
+# pattern wins, so these continue to hold if the allowlist is ever widened.
+# =============================================================================
+
+# -- Credentials, salts, local environment ------------------------------------
+wp-config.php
+wp-config-local.php
+local-config.php
+.env
+.env.*
+*.env
+auth.json
+secrets.*
+credentials.*
+*.pem
+*.key
+*.ppk
+*.p12
+*.pfx
+.htpasswd
+
+# -- Logs ---------------------------------------------------------------------
+wp-content/debug.log
+debug.log
+error_log
+php_errorlog
+*.log
+
+# -- Uploads and generated caches ---------------------------------------------
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/upgrade-temp-backup/
+wp-content/cache/
+wp-content/backups/
+wp-content/ai1wm-backups/
+
+# -- Database dumps and archives ----------------------------------------------
+*.sql
+*.sql.gz
+*.sql.bz2
+*.sql.zip
+*.dump
+*.mwb
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# -- Claude Code / AI session artefacts ---------------------------------------
+.claude/
+CLAUDE.local.md
+.mcp.json
+scratchpad/
+*.scratchpad
+.cursor/
+.aider*
+.codeium/
+
+# -- Editor, OS and tooling noise ---------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+*.tmp
+*.orig
+*.rej
+
+# -- Dependencies and build output --------------------------------------------
+node_modules/
+vendor/
+composer.phar
+.phpunit.result.cache
+.php-cs-fixer.cache
+.phpcs.cache
