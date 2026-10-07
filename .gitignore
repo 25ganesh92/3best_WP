@@ -20,6 +20,8 @@
 
 # ... then re-include only what the project owns.
 !.gitignore
+!/README.md
+!/LICENSE
 !/project/
 !/wp-content/
 
