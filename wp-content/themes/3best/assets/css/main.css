@@ -2016,7 +2016,25 @@ textarea {
    rendered by 3best-core; the look lives here with the rest of the system.
    ========================================================================= */
 
+/*
+ * The card carries its own containment, because the block renderer does not.
+ *
+ * On a block-rendered landing page Blocks::render_lead_form() emits .tb-lead on
+ * its own, so the form is a direct child of .wp-site-blocks and inherits none
+ * of what template-parts/landing/form.php gives the PHP fallback path: no
+ * section, no .container gutter and no 860px measure. Root padding is 0, so the
+ * card spanned the viewport edge to edge, and WordPress's own
+ * :where(.wp-site-blocks) > * rule added 24px on top of the preceding section's
+ * 84px of padding.
+ *
+ * 860px is the measure .tb-landing-form__wrap already establishes for this
+ * form; subtracting 40px reproduces the 20px gutters of .container. Using min()
+ * rather than max-width means the card can never exceed the viewport, so there
+ * is no horizontal overflow at any width.
+ */
 .tb-lead {
+	width: min(860px, 100% - 40px);
+	margin: 0 auto;
 	background: var(--color-surface);
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-xl);
@@ -2025,20 +2043,56 @@ textarea {
 	scroll-margin-top: 96px;
 }
 
+/*
+ * The form is a continuation of the section above it rather than a new section,
+ * so the gap before the card is tightened to 36px from the 84px of section
+ * rhythm. Scoping this with :has() to a section that is immediately followed by
+ * the card leaves the shared .tb-section padding untouched everywhere else,
+ * including the 60px variant at <= 640px - which this still wins against,
+ * because :has() carries its argument's specificity (0,2,0 against 0,1,0) and a
+ * media query adds none. A browser without :has() support simply keeps the
+ * inherited padding, which is the spacing that was there before.
+ */
+.tb-section:has(+ .tb-lead) {
+	padding-bottom: 36px;
+}
+
+/*
+ * Below the card the section rhythm is kept in full, because what follows
+ * genuinely is a new section. Only WordPress's 24px block margin is removed, so
+ * the gap below is the following section's own padding and nothing more.
+ */
+.tb-lead + .tb-section {
+	margin-block-start: 0;
+}
+
+/*
+ * The fallback path nests the card in .container > .tb-landing-form__wrap,
+ * which already supply the gutter and the measure. Suite 4 renders that path,
+ * so it has to keep behaving exactly as it did.
+ */
+.tb-landing-form__wrap .tb-lead {
+	width: 100%;
+	margin: 0;
+}
+
 .tb-lead__stage[hidden] {
 	display: none;
 }
 
 .tb-lead__header {
-	margin-bottom: 24px;
+	margin-bottom: 28px;
 }
 
 .tb-lead__title {
 	font-size: 1.45rem;
 }
 
+/* Held to a reading measure so the supporting line sits under the heading
+   rather than running the full width of the card. */
 .tb-lead__subtitle {
-	margin-top: 8px;
+	margin-top: 10px;
+	max-width: 56ch;
 	color: var(--color-muted);
 	font-size: 0.96rem;
 }
@@ -2131,8 +2185,8 @@ select.tb-field__control {
 /* Consent ----------------------------------------------------------------- */
 
 .tb-lead__consent {
-	margin-top: 22px;
-	padding: 16px 18px;
+	margin-top: 18px;
+	padding: 12px 14px;
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-md);
 	background: var(--color-surface-alt);
@@ -2141,15 +2195,21 @@ select.tb-field__control {
 .tb-consent {
 	display: flex;
 	align-items: flex-start;
-	gap: 12px;
+	gap: 10px;
 	cursor: pointer;
 }
 
+/*
+ * The box stays 20px: the label wraps both it and the text, so the click target
+ * is the whole row, but the box itself should not shrink below a comfortable
+ * size. The 1px nudge centres it on the first line of the text, whose line box
+ * is 0.93rem x 1.5 - a little over 22px.
+ */
 .tb-consent__box {
 	flex: none;
 	width: 20px;
 	height: 20px;
-	margin: 2px 0 0;
+	margin: 1px 0 0;
 	accent-color: var(--color-primary);
 	cursor: pointer;
 }
@@ -2389,6 +2449,18 @@ select.tb-field__control {
 
 	.tb-otp__row {
 		gap: 7px;
+	}
+}
+
+/* Matches the 16px gutter .container drops to at this width. */
+@media (max-width: 480px) {
+	.tb-lead {
+		width: min(860px, 100% - 32px);
+		padding: 18px;
+	}
+
+	.tb-lead__consent {
+		padding: 12px;
 	}
 }
 
